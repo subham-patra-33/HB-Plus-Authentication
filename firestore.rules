@@ -1,0 +1,40 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // The same rule is applied server-side: a Google token for any other
+    // domain cannot read or write application data, even if client code is
+    // modified or bypassed.
+    function signedInWithAllowedDomain() {
+      return request.auth != null
+        && request.auth.token.email is string
+        && request.auth.token.email.matches('@hbplus\\.fit$');
+    }
+
+    match /users/{uid} {
+      allow read: if signedInWithAllowedDomain()
+        && request.auth.uid == uid;
+
+      allow create: if signedInWithAllowedDomain()
+        && request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.role in ['admin', 'user'];
+
+      // A user can refresh harmless profile fields, but never promote their
+      // own role or change identity fields.
+      allow update: if signedInWithAllowedDomain()
+        && request.auth.uid == uid
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.email == resource.data.email;
+
+      allow delete: if false;
+    }
+
+    // Everything else is closed by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
