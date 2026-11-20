@@ -5,6 +5,7 @@ web-build/
 coverage/
 *.log
 .env
+.env.*
 .env.local
 .env.*.local
 !.env.example
@@ -23,3 +24,5 @@ ios/
 
 expo-env.d.ts
 # @end expo-cli
+# Local Netlify folder
+.netlify
