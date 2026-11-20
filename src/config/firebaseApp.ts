@@ -1,30 +1,43 @@
-import { getApp, getApps, initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+import { getApp, getApps, initializeApp, type FirebaseApp } from 'firebase/app';
+import { getFirestore, type Firestore } from 'firebase/firestore';
 
 export const firebaseConfig = {
-  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY ?? '',
-  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN ?? '',
-  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID ?? '',
-  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET ?? '',
-  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? '',
-  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID ?? '',
+  apiKey: (process.env.EXPO_PUBLIC_FIREBASE_API_KEY ?? '').trim(),
+  authDomain: (process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN ?? '').trim(),
+  projectId: (process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID ?? '').trim(),
+  storageBucket: (process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET ?? '').trim(),
+  messagingSenderId: (process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? '').trim(),
+  appId: (process.env.EXPO_PUBLIC_FIREBASE_APP_ID ?? '').trim(),
 };
 
-export const firebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
+export const missingFirebaseConfigKeys: Array<keyof typeof firebaseConfig> = (
+  Object.keys(firebaseConfig) as Array<keyof typeof firebaseConfig>
+).filter((key) => !firebaseConfig[key]);
 
-export const firestore = getFirestore(firebaseApp);
+export const isFirebaseConfigured = missingFirebaseConfigKeys.length === 0;
+
+export function getFirebaseConfigErrorMessage(): string {
+  const missingEnvVars = missingFirebaseConfigKeys.map(
+    (key) => `EXPO_PUBLIC_FIREBASE_${key.replace(/([A-Z])/g, '_$1').toUpperCase()}`,
+  );
+  return `Firebase configuration is incomplete. Missing or empty: ${missingEnvVars.join(', ')}. Please update your .env file and restart Expo with --clear.`;
+}
+
+function initFirebaseApp(): FirebaseApp {
+  if (getApps().length > 0) {
+    return getApp();
+  }
+  return initializeApp(firebaseConfig);
+}
+
+export const firebaseApp: FirebaseApp = initFirebaseApp();
+
+export const firestore: Firestore = getFirestore(firebaseApp);
 
 /** Fail early with a helpful message instead of an obscure Firebase error. */
 export function assertFirebaseConfigured(): void {
-  const missing = (Object.keys(firebaseConfig) as Array<keyof typeof firebaseConfig>).filter(
-    (key) => !firebaseConfig[key],
-  );
-
-  if (missing.length > 0) {
-    throw new Error(
-      `Firebase is not configured. Add ${missing
-        .map((key) => `EXPO_PUBLIC_FIREBASE_${key.replace(/([A-Z])/g, '_$1').toUpperCase()}`)
-        .join(', ')} to your .env file and restart Expo with --clear-cache.`,
-    );
+  if (!isFirebaseConfigured) {
+    throw new Error(getFirebaseConfigErrorMessage());
   }
 }
+

@@ -4,7 +4,6 @@ import {
   signInWithCredential,
   type UserCredential,
 } from 'firebase/auth';
-import { ALLOWED_EMAIL_DOMAIN } from '@/config/app';
 import { auth } from '@/config/auth';
 import { assertFirebaseConfigured } from '@/config/firebaseApp';
 import { assertGoogleClientConfigured } from './configCheck';
@@ -19,9 +18,8 @@ function configureGoogleSignIn(): void {
     iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
     scopes: ['email', 'profile'],
     offlineAccess: true,
-    // Extra native-layer filter for Google Workspace domains. The JS domain
-    // check + Firestore rules still apply as independent layers.
-    hostedDomain: ALLOWED_EMAIL_DOMAIN,
+    // No provider-level domain pre-filter: the app validates the returned email
+    // so every rejected account receives the exact ACCESS_RESTRICTED_MESSAGE.
   });
   isConfigured = true;
 }
@@ -37,18 +35,19 @@ export async function signInWithGoogle(): Promise<UserCredential> {
     throw new Error('Sign-in was cancelled. Please try again.');
   }
 
-  // Exchange Google's ID token for a Firebase credential. Firebase then issues
-  // and manages its own tokens; no raw Google token is stored by this app.
   const { idToken, accessToken } = await GoogleSignin.getTokens();
-  if (!idToken) throw new Error('Google did not return an ID token. Please try again.');
+  if (!idToken) {
+    throw new Error('Google did not return an ID token. Please try again.');
+  }
 
+  // Exchange the Google ID token for a Firebase credential. Firebase owns the
+  // resulting session tokens; the raw Google token is never persisted here.
   const credential = GoogleAuthProvider.credential(idToken, accessToken);
   return signInWithCredential(auth, credential);
 }
 
 export async function getRedirectCredential(): Promise<UserCredential | null> {
-  // Redirect flows are web-only.
-  return null;
+  return null; // Web-only flow.
 }
 
 export async function signOutFromProvider(): Promise<void> {
@@ -57,6 +56,6 @@ export async function signOutFromProvider(): Promise<void> {
       await GoogleSignin.signOut();
     }
   } catch {
-    // The Firebase session is still cleared by the caller.
+    // Firebase sign-out is still performed by the caller.
   }
 }

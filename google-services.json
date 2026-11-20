@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "747537720791",
+    "project_id": "hb-project-6461d",
+    "storage_bucket": "hb-project-6461d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:747537720791:android:1264759e074c1535495792",
+        "android_client_info": {
+          "package_name": "fit.hbplus.secureauth"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "747537720791-t41vq2567kv2jfn39d2v689kdeovt7fc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "fit.hbplus.secureauth",
+            "certificate_hash": "f46cfa60a1e18908358826e3769646c59594369c"
+          }
+        },
+        {
+          "client_id": "747537720791-sdmcbib0j8pep1tsoi62ivmbffqgm7fh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBW8ZoVHJWF_zOS9bVpW_LKCEVaCubQW9I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "747537720791-sdmcbib0j8pep1tsoi62ivmbffqgm7fh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

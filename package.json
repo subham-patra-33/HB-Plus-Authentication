@@ -1,5 +1,5 @@
 {
-  "name": "hbplus-secure-auth",
+  "name": "hbplus-auth",
   "version": "1.0.0",
   "private": true,
   "main": "expo-router/entry",
@@ -9,7 +9,9 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
-    "export:web": "expo export --platform web"
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "export:web": "expo export --platform web",
+    "verify": "npm run typecheck && npm test && npm run export:web"
   },
   "dependencies": {
     "@expo/metro-runtime": "~58.0.17",

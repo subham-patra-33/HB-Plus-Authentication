@@ -1,4 +1,4 @@
-import { ALLOWED_EMAIL_DOMAIN, ACCESS_RESTRICTED_MESSAGE } from '@/config/app';
+import { ALLOWED_EMAIL_DOMAIN, ACCESS_RESTRICTED_MESSAGE } from '../config/app.ts';
 
 export class DomainRestrictionError extends Error {
   constructor() {
@@ -7,11 +7,12 @@ export class DomainRestrictionError extends Error {
   }
 }
 
-/** Firebase lower-cases emails, but we normalize again for defense in depth. */
+/** Firebase lower-cases emails, but normalize again for defense in depth. */
 export function normalizeEmail(email: string | null | undefined): string {
   return (email ?? '').trim().toLowerCase();
 }
 
+/** Returns the part after a single '@', or an empty string for malformed input. */
 export function emailDomain(email: string | null | undefined): string {
   const normalized = normalizeEmail(email);
   const parts = normalized.split('@');
@@ -19,8 +20,9 @@ export function emailDomain(email: string | null | undefined): string {
 }
 
 /**
- * Exact (case-insensitive) match on the domain — `evilhbplus.fit` or
- * `hbplus.fit.attacker.com` must never pass.
+ * Exact, case-insensitive domain equality.
+ * `user@evil-hbplus.fit`, `user@hbplus.fit.attacker.com` and
+ * `user@hbplus.fit@evil.com` are all rejected.
  */
 export function isAllowedEmailDomain(email: string | null | undefined): boolean {
   const normalized = normalizeEmail(email);

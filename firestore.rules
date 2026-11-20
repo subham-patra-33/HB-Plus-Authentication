@@ -8,28 +8,43 @@ service cloud.firestore {
     function signedInWithAllowedDomain() {
       return request.auth != null
         && request.auth.token.email is string
-        && request.auth.token.email.matches('@hbplus\\.fit$');
+        && request.auth.token.email.matches('.*@hbplus\\.fit$');
+    }
+
+    function isAdmin() {
+      return signedInWithAllowedDomain()
+        && (
+          (request.auth.token.keys().hasAll(['admin']) && request.auth.token.admin == true)
+          || (exists(/databases/$(database)/documents/users/$(request.auth.uid))
+              && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+        );
     }
 
     match /users/{uid} {
+      // Users can read their own profile; Admins can read all profiles for user management
       allow read: if signedInWithAllowedDomain()
-        && request.auth.uid == uid;
+        && (request.auth.uid == uid || isAdmin());
 
       allow create: if signedInWithAllowedDomain()
         && request.auth.uid == uid
         && request.resource.data.uid == uid
         && request.resource.data.email == request.auth.token.email
-        && request.resource.data.role in ['admin', 'user'];
+        // A client can never create itself as an admin. Promotion is a
+        // separate update performed by an existing admin or a custom claim.
+        && request.resource.data.role == 'user';
 
       // A user can refresh harmless profile fields, but never promote their
-      // own role or change identity fields.
+      // own role or change identity fields. Admins can update roles.
       allow update: if signedInWithAllowedDomain()
-        && request.auth.uid == uid
-        && request.resource.data.role == resource.data.role
-        && request.resource.data.uid == resource.data.uid
-        && request.resource.data.email == resource.data.email;
+        && (
+          (request.auth.uid == uid
+            && request.resource.data.role == resource.data.role
+            && request.resource.data.uid == resource.data.uid
+            && request.resource.data.email == resource.data.email)
+          || isAdmin()
+        );
 
-      allow delete: if false;
+      allow delete: if isAdmin();
     }
 
     // Everything else is closed by default.
@@ -38,3 +53,4 @@ service cloud.firestore {
     }
   }
 }
+

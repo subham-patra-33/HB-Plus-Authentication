@@ -1,5 +1,5 @@
 import { ACCESS_RESTRICTED_MESSAGE } from '@/config/app';
-import { DomainRestrictionError } from './domain';
+import { DomainRestrictionError } from './domainValidation';
 
 type FirebaseLikeError = { code?: string; message?: string };
 
@@ -14,7 +14,6 @@ function messageOf(error: unknown): string {
 }
 
 const MESSAGES: Record<string, string> = {
-  // Web / Firebase Auth
   'auth/popup-closed-by-user': 'Sign-in was cancelled. Please try again.',
   'auth/cancelled-popup-request': 'Sign-in was cancelled. Please try again.',
   'auth/popup-blocked':
@@ -29,8 +28,6 @@ const MESSAGES: Record<string, string> = {
     'Network error. Check your connection and try again.',
   'auth/invalid-api-key': 'Firebase configuration is invalid. Check your .env file.',
   'auth/user-disabled': 'This account has been disabled.',
-
-  // @react-native-google-signin/google-signin
   SIGN_IN_CANCELLED: 'Sign-in was cancelled. Please try again.',
   IN_PROGRESS: 'A sign-in is already in progress. Please try again shortly.',
   PLAY_SERVICES_NOT_AVAILABLE:

@@ -1,4 +1,3 @@
 /// <reference types="expo/types" />
 
-// This file is generated/managed by Expo. It makes `process.env.EXPO_PUBLIC_*`
-// variables typed as `string | undefined` throughout the app.
+// NOTE: This file should not be edited and should be in your git ignore

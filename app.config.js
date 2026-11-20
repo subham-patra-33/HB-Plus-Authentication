@@ -2,16 +2,22 @@ const iosUrlScheme = process.env.EXPO_PUBLIC_GOOGLE_IOS_URL_SCHEME;
 
 export default {
   expo: {
-    name: 'HB Plus Secure Auth',
-    slug: 'hbplus-secure-auth',
+    name: 'HB Plus',
+    slug: 'hbplus-auth',
     version: '1.0.0',
     orientation: 'portrait',
     userInterfaceStyle: 'light',
-    scheme: 'hbplusauth',
+    scheme: 'hbplus',
     newArchEnabled: true,
+
+    extra: {
+      eas: {
+        projectId: '2207ab41-16ab-4c66-87dc-1b17c97816ae',
+      },
+    },
+
     web: {
       bundler: 'metro',
-      // Single-page app: auth state is resolved on the client, no server rendering.
       output: 'single',
       favicon: './assets/favicon.png',
     },
@@ -20,7 +26,6 @@ export default {
     },
     plugins: [
       'expo-router',
-      // Only needed for native iOS builds. Requires the reversed iOS client ID.
       ...(iosUrlScheme
         ? [
             [
